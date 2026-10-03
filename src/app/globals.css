@@ -24,8 +24,8 @@
   --color-signal-ok: #1f7a4d;
   --color-signal-quantum: #6b3fa0;
 
-  --font-display: var(--font-familjen), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-azeret), ui-monospace, monospace;
+  --font-display: var(--font-chivo), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-martian), ui-monospace, monospace;
 }
 
 :root {

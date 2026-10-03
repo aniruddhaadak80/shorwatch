@@ -1,20 +1,28 @@
 import type { Metadata } from "next";
-import { Familjen_Grotesk, Azeret_Mono } from "next/font/google";
+import { Chivo, Martian_Mono } from "next/font/google";
 import "./globals.css";
 import { SITE, NAV } from "@/config/site";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 
-const display = Familjen_Grotesk({
-  variable: "--font-familjen",
+/**
+ * Type pairing chosen to be distinct from every recent build: not Archivo +
+ * DM Mono, not Familjen Grotesk + Azeret Mono, not Fraunces + Azeret Mono, and
+ * not Instrument Serif + IBM Plex Mono. Chivo's squared terminals suit an
+ * instrument face, and Martian Mono is a technical face that holds alignment at
+ * the small sizes every readout uses.
+ */
+const display = Chivo({
+  variable: "--font-chivo",
   subsets: ["latin"],
   display: "swap",
 });
 
-const mono = Azeret_Mono({
-  variable: "--font-azeret",
+const mono = Martian_Mono({
+  variable: "--font-martian",
   subsets: ["latin"],
   display: "swap",
+  weight: ["400", "500", "600"],
 });
 
 export const metadata: Metadata = {
