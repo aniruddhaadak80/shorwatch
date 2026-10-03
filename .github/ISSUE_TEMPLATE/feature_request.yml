@@ -1,0 +1,36 @@
+---
+name: Feature or algorithm support
+about: Add an algorithm, source, or improve the measurement
+title: ""
+labels: enhancement
+assignees: ""
+---
+
+## What you are proposing
+
+<!-- One paragraph. -->
+
+## Why it belongs in Shorwatch
+
+<!-- Tie it to a real job a security architect has to do. -->
+
+## What it would change
+
+Check the boxes this touches:
+
+- [ ] A new or changed algorithm OID in `src/lib/der.ts`
+- [ ] A new post-quantum parameter set in `PQC_PARAMETERS`
+- [ ] A new live source adapter in `src/lib/sources/`
+- [ ] An engine factor, weight or resource anchor (needs `ENGINE_VERSION` bumped)
+- [ ] A new MCP tool in `src/lib/mcp/tools.ts`
+- [ ] Documentation only
+
+## Evidence
+
+If you are adding a parameter set or an OID, cite the standard and include a
+test fixture or a value from the specification. Shorwatch publishes its
+constants, so an unsourced number does not belong here.
+
+## Alternative
+
+<!-- If applicable. -->

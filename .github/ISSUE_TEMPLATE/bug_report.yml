@@ -1,0 +1,38 @@
+---
+name: Bug report
+about: Something Shorwatch measured or displayed incorrectly
+title: ""
+labels: bug
+assignees: ""
+---
+
+## What happened
+
+<!-- What you saw, and what you expected instead. -->
+
+## How to reproduce
+
+1. Host you measured: `example.com`
+2. Route you were on: `/watches`, `/`, `/analysis`, …
+3. What you clicked or requested
+4. What you saw
+
+## Measured details
+
+These make a report actionable. From the watch detail page:
+
+- SubjectPublicKeyInfo SHA-256:
+- Algorithm and OID:
+- Certificate SHA-256:
+- Engine version shown on `/standards`:
+
+If this is about the agent endpoint, include the JSON-RPC request and response.
+
+## Environment
+
+- Shorwatch commit:
+- Browsing a deployment, or local (`npm run dev`)?
+
+## Anything else
+
+Console output or a screenshot if you have one.

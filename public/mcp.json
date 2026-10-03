@@ -1,0 +1,27 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-06-18/server.schema.json",
+  "name": "io.github.aniruddhaadak80/shorwatch",
+  "description": "Measure the public key a host is actually serving, corroborate it against Certificate Transparency, and compute a post-quantum harvest deadline you can triage and export.",
+  "version": "1.0.0",
+  "repository": {
+    "url": "https://github.com/aniruddhaadak80/shorwatch",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "shorwatch",
+      "version": "1.0.0",
+      "transport": {
+        "type": "streamable-http",
+        "url": "https://shorwatch-aniruddha-adaks-projects.vercel.app/api/mcp"
+      }
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://shorwatch-aniruddha-adaks-projects.vercel.app/api/mcp"
+    }
+  ]
+}

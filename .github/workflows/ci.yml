@@ -1,0 +1,99 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: typecheck, lint, test, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit tests
+        run: npm run test
+
+      - name: Production build
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+
+      - name: Confirm no secrets reached the client bundle
+        run: |
+          set -euo pipefail
+          # No environment variable name or credential-looking value may ship to
+          # the browser. NEXT_PUBLIC_* is the only intended exposure.
+          if grep -rIl -E 'DATABASE_URL|POSTGRES_URL|SHORWATCH_ALLOW_EMBEDDED_STORE|postgres(ql)?://' .next/static .next/server/app 2>/dev/null | grep -q .; then
+            echo "::error::a server-only variable reached the build output"
+            grep -rIl -E 'DATABASE_URL|POSTGRES_URL|SHORWATCH_ALLOW_EMBEDDED_STORE' .next/static 2>/dev/null || true
+            exit 1
+          fi
+          echo "no server-only identifiers found in the client bundle"
+
+      - name: Confirm the embedded store is absent from the production path
+        run: |
+          set -euo pipefail
+          # Production must reach Postgres over HTTP, never PGlite.
+          if grep -q 'electric-sql/pglite' .next/server/chunks/*.js 2>/dev/null \
+             && ! grep -rq 'serverExternalPackages' next.config.ts; then
+            echo "::error::PGlite is not externalised in next.config.ts"
+            exit 1
+          fi
+          echo "store selection is guarded"
+
+  browser:
+    name: browser journey
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: verify
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Build
+        run: npm run build
+
+      - name: Run the primary journey
+        run: npm run test:e2e
+
+      - name: Upload the failure context
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: test-results/
+          retention-days: 7
