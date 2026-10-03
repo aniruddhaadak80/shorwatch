@@ -102,6 +102,29 @@ export function FactorLedger({ engine }: { engine: EngineResult }) {
               {engine.factors.reduce((sum, f) => sum + f.contribution, 0).toFixed(2)}
             </td>
           </tr>
+          <tr>
+            <th scope="row" className="legend py-2 text-left">
+              Quantum advisor adjustment
+            </th>
+            <td />
+            <td className="legend py-2">
+              &lt;Z0&gt; {engine.advisor.expectationZ} · &lt;Z0Z1&gt; {engine.advisor.expectationZZ}
+            </td>
+            <td className="readout py-2 text-right font-semibold text-signal-quantum">
+              {engine.advisor.adjustment > 0 ? "+" : ""}
+              {engine.advisor.adjustment.toFixed(2)}
+            </td>
+          </tr>
+          <tr>
+            <th scope="row" className="legend-strong py-3 text-left">
+              Final exposure score
+            </th>
+            <td />
+            <td className="legend py-3">bounded to 0–100</td>
+            <td className="readout py-3 text-right text-lg font-semibold">
+              {engine.score.toFixed(2)}
+            </td>
+          </tr>
         </tfoot>
       </table>
 
