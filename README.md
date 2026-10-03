@@ -92,6 +92,7 @@ npm run build       # production build
 npm run check       # all four in sequence
 npm run test:e2e    # browser journey (starts its own server)
 npm run verify      # live verification against BASE_URL
+npm run screenshots  # regenerate docs/ from a deployment
 ```
 
 ## 🔌 API

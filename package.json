@@ -12,6 +12,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "verify": "node scripts/verify-live.mjs",
+    "screenshots": "node scripts/capture-screenshots.mjs",
     "check": "npm run typecheck && npm run lint && npm run test && npm run build"
   },
   "dependencies": {
@@ -36,5 +37,6 @@
     "vitest": "^5.0.3"
   },
   "description": "Measure the public key a host is actually serving, corroborate it against Certificate Transparency, and compute a post-quantum harvest deadline you can triage and export.",
-  "license": "MIT"
+  "license": "MIT",
+  "screenshots": "node scripts/capture-screenshots.mjs"
 }
