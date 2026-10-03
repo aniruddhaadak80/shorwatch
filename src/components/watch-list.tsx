@@ -57,8 +57,9 @@ export function WatchList({ initial, total }: { initial: Watch[]; total: number 
       }
       setHost("");
       setLabel("");
+      // Navigate straight to the new watch. A refresh here would race the
+      // navigation and abort the render stream mid-flight.
       router.push(`/watches/${payload.watch.id}`);
-      router.refresh();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "could not create that watch");
     } finally {

@@ -37,6 +37,15 @@ function todayMs(): number {
   return Date.now();
 }
 
+/** Compact axis label, e.g. 20000000 becomes "20M". */
+function compact(value: number): string {
+  if (!Number.isFinite(value)) return "";
+  if (value >= 1e9) return `${(value / 1e9).toFixed(value >= 1e10 ? 0 : 1)}B`;
+  if (value >= 1e6) return `${(value / 1e6).toFixed(value >= 1e7 ? 0 : 1)}M`;
+  if (value >= 1e3) return `${(value / 1e3).toFixed(0)}k`;
+  return value.toFixed(0);
+}
+
 /**
  * The signature interaction.
  *
@@ -79,7 +88,24 @@ export function QubitStaircase({
     });
   }, [distance]);
 
-  const maxPhysical = Math.max(...curve.map((point) => point.physical), capacity) * 1.15;
+  /**
+   * Plot bounds. The y axis is logarithmic, so positions must be normalised
+   * against the log *range* of the plotted values. Dividing log10(v) by
+   * log10(max) instead would collapse every point into the top of the box,
+   * because all the values share a decade.
+   */
+  const bounds = useMemo(() => {
+    const values = [...curve.map((point) => point.physical), capacity];
+    const logs = values.map((value) => Math.log10(Math.max(value, 1)));
+    const lo = Math.min(...logs);
+    const hi = Math.max(...logs);
+    const span = hi - lo || 1;
+    return {
+      lo,
+      hi,
+      yFor: (value: number) => 90 - ((Math.log10(Math.max(value, 1)) - lo) / span) * 74,
+    };
+  }, [curve, capacity]);
 
   /** Re-rank: the same ordering rule the analysis route uses. */
   const ranked = useMemo(() => {
@@ -119,7 +145,7 @@ export function QubitStaircase({
           </p>
         </div>
 
-        <div className="graticule relative p-4">
+<div className="graticule relative p-4">
           <svg
             viewBox="0 0 100 100"
             preserveAspectRatio="none"
@@ -127,13 +153,34 @@ export function QubitStaircase({
             role="img"
             aria-label={`Physical qubits required to factor an RSA modulus, from ${curve[0].physical.toLocaleString("en-US")} qubits at 1024 bits to ${curve[curve.length - 1].physical.toLocaleString("en-US")} at 4096 bits. The assumed capacity line sits at ${capacity.toLocaleString("en-US")} qubits.`}
           >
+            {/* Decade rules, so a log axis can be read rather than trusted. */}
+            {[0, 0.25, 0.5, 0.75, 1].map((fraction) => {
+              const y = 90 - fraction * 74;
+              const value = 10 ** (bounds.lo + fraction * (bounds.hi - bounds.lo));
+              return (
+                <g key={fraction}>
+                  <line
+                    x1={4}
+                    x2={96}
+                    y1={y}
+                    y2={y}
+                    stroke="var(--color-rule)"
+                    strokeWidth={0.3}
+                    vectorEffect="non-scaling-stroke"
+                  />
+                  <text x={4.5} y={y - 1} fontSize={2.4} fill="var(--color-ink-faint)">
+                    {compact(value)}
+                  </text>
+                </g>
+              );
+            })}
+
             {/* Staircase: each modulus size is a real computed requirement. */}
             <polyline
               points={curve
                 .map((point, index) => {
-                  const x = 8 + index * ((84) / (curve.length - 1));
-                  const y = 92 - (Math.log10(point.physical) / Math.log10(maxPhysical)) * 80;
-                  return `${x},${y}`;
+                  const x = 8 + index * (84 / (curve.length - 1));
+                  return `${x},${bounds.yFor(point.physical)}`;
                 })
                 .join(" ")}
               fill="none"
@@ -143,7 +190,7 @@ export function QubitStaircase({
             />
             {curve.map((point, index) => {
               const x = 8 + index * (84 / (curve.length - 1));
-              const y = 92 - (Math.log10(point.physical) / Math.log10(maxPhysical)) * 80;
+              const y = bounds.yFor(point.physical);
               return (
                 <g key={point.bits}>
                   <circle cx={x} cy={y} r={1.1} fill="var(--color-signal-risk)" />
@@ -164,11 +211,11 @@ export function QubitStaircase({
             })}
 
             {/* The capacity line is the control. */}
-            <line
+<line
               x1={4}
               x2={96}
-              y1={92 - (Math.log10(capacity) / Math.log10(maxPhysical)) * 80}
-              y2={92 - (Math.log10(capacity) / Math.log10(maxPhysical)) * 80}
+              y1={bounds.yFor(capacity)}
+              y2={bounds.yFor(capacity)}
               stroke="var(--color-signal-live)"
               strokeWidth={1.1}
               strokeDasharray="3 2"
@@ -176,7 +223,10 @@ export function QubitStaircase({
             />
           </svg>
 
-          <p className="legend mt-2">x: RSA modulus bits · y: physical qubits (log) · lower labels: projected CRQ year</p>
+          <p className="legend mt-2">
+            x: RSA modulus bits · y: physical qubits (log scale, labelled) · lower labels:
+            projected CRQ year · dashed line: assumed machine
+          </p>
 
           <div className="mt-5 space-y-4">
             <div>
