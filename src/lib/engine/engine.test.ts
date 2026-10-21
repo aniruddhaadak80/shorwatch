@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
 import { classicalSecurityBits, crqYearFor, evaluateHarvest } from "./index";
-import { ENGINE_NAME, ENGINE_VERSION, WEIGHTS, WEIGHT_SUM } from "./constants";
+import {
+  ENGINE_NAME,
+  ENGINE_VERSION,
+  MIGRATION_LEAD_DAYS,
+  WEIGHTS,
+  WEIGHT_SUM,
+} from "./constants";
 import { canonicalJson, sealEvent } from "../integrity/seal";
 import {
   DEFAULT_MACHINE,
@@ -328,5 +335,20 @@ describe("family helpers", () => {
       crqYearFor("ml-kem", makeInput({ algorithm: "ml-kem", bits: null, nistLevel: 3 })),
     ).toBe(Number.POSITIVE_INFINITY);
     expect(crqYearFor("rsa", makeInput({ bits: 2048 }))).toBe(2035);
+  });
+});
+
+describe("the published migration lead time", () => {
+  it("reserves exactly the published number of days", () => {
+    const result = evaluateHarvest(makeInput(), { now: NOW });
+    expect(result.leadTimeDays).toBe(result.daysToCrq - MIGRATION_LEAD_DAYS);
+  });
+
+  it("is taken from the published constant, not from a copy of it inside the engine", () => {
+    // The engine used to inline `Math.round(3 * 365.25)` twice, so the score could
+    // contradict the model the product publishes on /standards and /settings.
+    const source = readFileSync(new URL("./index.ts", import.meta.url), "utf8");
+    expect(source).not.toMatch(/365\.25/);
+    expect(source).toContain("MIGRATION_LEAD_YEARS");
   });
 });

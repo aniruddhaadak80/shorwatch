@@ -15,6 +15,7 @@ import {
   ADVISOR_MAX_ADJUSTMENT,
   ENGINE_NAME,
   ENGINE_VERSION,
+  MIGRATION_LEAD_YEARS,
   WEIGHTS,
   WEIGHT_SUM,
   type WeightKey,
@@ -28,6 +29,7 @@ import {
   ecClassicalStrength,
   isQuantumSafe,
   isShorBroken,
+  leadTimeDays,
   leadTimeRaw,
   publicExposureRaw,
   quantumResource,
@@ -187,10 +189,12 @@ export function evaluateHarvest(input: HarvestInput, options: EngineOptions = {}
     : "The algorithm has no projected quantum deadline inside the model window.";
 
   // --- factor 4: is there migration time left ---
-  const available = daysToCrq - Math.round(3 * 365.25);
+  // The lead time comes from the published assumption, never from a copy of it: the
+  // constant is what /standards, /settings and the export print.
+  const available = leadTimeDays(crqDate, now);
   const leadRaw = isShorBroken(family) || isQuantumSafe(family) ? leadTimeRaw(available) : 0.5;
   const leadDetail = Number.isFinite(crqYear)
-    ? `${Math.round(available)} days of lead time remain once a ${3}-year migration programme is reserved.`
+    ? `${Math.round(available)} days of lead time remain once a ${MIGRATION_LEAD_YEARS}-year migration programme is reserved.`
     : "No migration deadline applies to a post-quantum parameter set.";
 
   // --- factor 5: co-observed exposure of the same address ---
@@ -224,7 +228,7 @@ export function evaluateHarvest(input: HarvestInput, options: EngineOptions = {}
     verdict = "quantum_viable";
   } else if (!isShorBroken(family)) {
     verdict = "window_closing";
-  } else if (daysToCrq - Math.round(3 * 365.25) <= 0) {
+  } else if (available <= 0) {
     verdict = "harvestable_now";
   } else {
     verdict = "exposed_before_crq";
