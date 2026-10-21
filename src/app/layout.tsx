@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import { Chivo, Martian_Mono } from "next/font/google";
 import "./globals.css";
 import { SITE, NAV } from "@/config/site";
@@ -73,7 +74,7 @@ export const viewport = {
   ],
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={`${display.variable} ${mono.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
